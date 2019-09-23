@@ -16,7 +16,7 @@ The framework requires Zeek 3.0.0, which you can download and install
 per the instructions on the [Zeek web site](https://zeek.org/download).
 
 You will also need to install osquery and osquery Zeek extension
-according to [these instructions](https://github.com/zeek/osquery-extension)).
+according to [these instructions](https://github.com/zeek/osquery-extension).
 
 # Installation
 
@@ -79,5 +79,5 @@ Once enabled, you'll start seeing these additional Zeek log files:
 # Credits
 
 This Zeek framework is based on an earlier implementation by [Steffan
-Haas](https://github.com/iBigQ), with additonal work contributed by
+Haas](https://github.com/iBigQ), with additional work contributed by
 [Corelight](https://www.corelight.com).
