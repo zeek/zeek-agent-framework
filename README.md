@@ -21,7 +21,11 @@ according to [these instructions](https://github.com/zeek/osquery-extension).
 # Installation
 
 The easiest way to install this Zeek osquery framework, is through the
-[Zeek package manager](https://docs.zeek.org/projects/package-manager/en/stable/index.html):
+[Zeek package manager](https://docs.zeek.org/projects/package-manager/en/stable/index.html).
+If you have not installed the package manager yet, do that first:
+
+    # pip install zkg
+    # zkg autoconfig
 
     # zkg install zeek/osquery-framework
 
