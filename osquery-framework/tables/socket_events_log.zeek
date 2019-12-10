@@ -13,7 +13,6 @@ export {
                 fd: int &log;
                 path: string &log;
                 family: int &log;
-                protocol: int &log;
                 local_address: addr &log;
                 remote_address: addr &log;
                 local_port: int &log;
@@ -24,7 +23,7 @@ export {
 }
 
 @if ( !Cluster::is_enabled() || Cluster::local_node_type() == Cluster::MANAGER )
-event osquery::socket_event_added(t: time, host_id: string, action: string, pid: int, fd: int, path: string, family: int, protocol: int, local_address: string, remote_address: string, local_port: int, remote_port: int, start_time: int, success: int) {
+event osquery::socket_event_added(t: time, host_id: string, action: string, pid: int, fd: int, path: string, family: int, local_address: string, remote_address: string, local_port: int, remote_port: int, start_time: int, success: int) {
         if (action == "connect" || local_address == "") {
           local_address = "0.0.0.0";
         }
@@ -40,7 +39,6 @@ event osquery::socket_event_added(t: time, host_id: string, action: string, pid:
                	$fd = fd,
                 $path = path,
                 $family = family,
-                $protocol = protocol,
                 $local_address = to_addr(local_address),
                 $remote_address = to_addr(remote_address),
                 $local_port = local_port,
