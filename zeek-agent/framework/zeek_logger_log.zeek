@@ -30,5 +30,5 @@ event zeek_agent::log_added(t: time, host_id: string, event_time :int, severity 
 
 event zeek_init()
 	{
-	Log::create_stream(LOG, [$columns=Info, $path="osq-zeek_logger"]);
+	Log::create_stream(LOG, [$columns=Info, $path="zeek-agent-logger"]);
 	}
