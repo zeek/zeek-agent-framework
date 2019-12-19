@@ -1,6 +1,6 @@
 #! Logs users activity.
 
-module osquery::logging::table_users;
+module zeek_agent::logging::table_users;
 
 export {
 	# Logging
@@ -23,7 +23,7 @@ export {
 }
 
 @if ( !Cluster::is_enabled() || Cluster::local_node_type() == Cluster::MANAGER )
-event osquery::user_added(t: time, host_id: string, uid: int, gid: int, uid_signed: int, gid_signed: int, username: string, description: string, directory: string, shell: string, uuid: string, user_type: string) {
+event zeek_agent::user_added(t: time, host_id: string, uid: int, gid: int, uid_signed: int, gid_signed: int, username: string, description: string, directory: string, shell: string, uuid: string, user_type: string) {
         local info: Info = [
 		$t=t,
 		$host=host_id,
@@ -44,5 +44,5 @@ event osquery::user_added(t: time, host_id: string, uid: int, gid: int, uid_sign
 @endif
 
 event zeek_init() {
-        Log::create_stream(LOG, [$columns=Info, $path="osq-users"]);
+        Log::create_stream(LOG, [$columns=Info, $path="agent-users"]);
 }

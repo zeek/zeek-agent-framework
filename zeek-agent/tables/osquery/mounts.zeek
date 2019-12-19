@@ -1,9 +1,8 @@
 #! Query mounts activity.
 
-@load osquery-framework
-@load ./configuration
+@load zeek-agent
 
-module osquery;
+module zeek_agent;
 
 export {
 	## Event to indicate that a new mount was created on a host
@@ -17,18 +16,18 @@ export {
 	global mount_removed: event(t: time, host_id: string, device: string, device_alias: string, path: string, typ: string, blocks_size: int, blocks: int, flags: string);
 }
 
-event osquery::table_mounts(resultInfo: osquery::ResultInfo,
+event zeek_agent::table_mounts(resultInfo: zeek_agent::ResultInfo,
 		device: string, device_alias: string, path: string, typ: string,
 		blocks_size: int, blocks: int, flags: string) {
-	if ( resultInfo$utype == osquery::ADD ) {
-		event osquery::mount_added(network_time(), resultInfo$host, device, device_alias, path, typ, blocks_size, blocks, flags);
+	if ( resultInfo$utype == zeek_agent::ADD ) {
+		event zeek_agent::mount_added(network_time(), resultInfo$host, device, device_alias, path, typ, blocks_size, blocks, flags);
 	}
-	if ( resultInfo$utype == osquery::REMOVE ) {
-		event osquery::mount_added(network_time(), resultInfo$host, device, device_alias, path, typ, blocks_size, blocks, flags);
+	if ( resultInfo$utype == zeek_agent::REMOVE ) {
+		event zeek_agent::mount_added(network_time(), resultInfo$host, device, device_alias, path, typ, blocks_size, blocks, flags);
 	}
 }
 
 event zeek_init(){
-	local ev = [$ev=osquery::table_mounts,$query="SELECT device, device_alias, path, type, blocks_size, blocks, flags FROM mounts", $utype=osquery::BOTH, $inter=osquery::QUERY_INTERVAL];
-	osquery::subscribe(ev);
+	local ev = [$ev=zeek_agent::table_mounts,$query="SELECT device, device_alias, path, type, blocks_size, blocks, flags FROM mounts", $utype=zeek_agent::BOTH, $inter=zeek_agent::QUERY_INTERVAL];
+	zeek_agent::subscribe(ev);
 	}

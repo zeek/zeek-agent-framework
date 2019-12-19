@@ -1,7 +1,7 @@
-module osquery;
+module zeek_agent;
 
 export {
-    ## Subscribe to an event. Whenever an osquery client connects to us, we'll subscribe to all matching activity
+    ## Subscribe to an event. Whenever an zeek-agent connects to us, we'll subscribe to all matching activity
     ## from it.
     ##
     ## The query is an mandatory parameter and contains one query. It is send to the specified hosts
@@ -10,7 +10,7 @@ export {
     ## q: The queries to subscribe to.
     ## host_list: Specific hosts to address per query (optional).
     ## group_list: Specific groups to address per query (optional).
-    global insert_subscription: function(q: osquery::Query, host_list: vector of string &default=vector(""), group_list: vector of string &default=vector(""));
+    global insert_subscription: function(q: zeek_agent::Query, host_list: vector of string &default=vector(""), group_list: vector of string &default=vector(""));
 
     ## Unsubscribe from an events. This will get sent to all clients that are currently connected and would match
     ## a similar subscribe call.
@@ -21,7 +21,7 @@ export {
     ## q: The queries to revoke.
     ## host_list: Specific hosts to address per query (optional).
     ## group_list: Specific groups to address per query (optional).
-    global remove_subscription: function(q: osquery::Query, host_list: vector of string &default=vector(""), group_list: vector of string &default=vector(""));
+    global remove_subscription: function(q: zeek_agent::Query, host_list: vector of string &default=vector(""), group_list: vector of string &default=vector(""));
 
     ## Send a one-time query to all currently connected clients.
     ##
@@ -31,9 +31,9 @@ export {
     ## q: The queries to execute.
     ## host_list: Specific hosts to address per query (optional).
     ## group_list: Specific groups to address per query (optional).
-    global insert_execution: function(q: osquery::Query, host_list: vector of string &default=vector(""), group_list: vector of string &default=vector(""));
+    global insert_execution: function(q: zeek_agent::Query, host_list: vector of string &default=vector(""), group_list: vector of string &default=vector(""));
 
-    ## Make subnets to be addressed by a group. Whenever an osquery client connects to us, we'll instruct it to join
+    ## Make subnets to be addressed by a group. Whenever an zeek-agent connects to us, we'll instruct it to join
     ## the given group.
     ##
     ## range_list: the subnets that are addressed.
@@ -59,7 +59,7 @@ export {
 
     # Internal record for tracking a subscription.
     type Subscription: record {
-        query: osquery::Query;
+        query: zeek_agent::Query;
         hosts: vector of string;
         groups: vector of string;
     };
@@ -81,22 +81,22 @@ global groupings: vector of Grouping;
 global hosts: set[string];
 
 # Internal set for groups of clients
-global groups: set[string] = {osquery::HostBroadcastTopic};
+global groups: set[string] = {zeek_agent::HostBroadcastTopic};
 
 # Internal table for tracking client (ids) and their respective groups
 global host_groups: table[string] of vector of string;
 
-# Internal mapping of broker id (peer_name) to osquery id (host_id)
+# Internal mapping of broker id (peer_name) to zeek-agent id (host_id)
 global peer_to_host: table[string] of string;
 
-function insert_subscription(q: osquery::Query, host_list: vector of string, group_list: vector of string)
+function insert_subscription(q: zeek_agent::Query, host_list: vector of string, group_list: vector of string)
 {
     # Include new Subscription in the vector
     subscriptions[|subscriptions|] = [$query=q, $hosts=host_list, $groups=group_list];
     if (|host_list|<=1 && host_list[0]=="" && |group_list|<=1 && group_list[0]=="")
     {
         # To all if nothing specified
-        osquery::send_subscribe(osquery::HostBroadcastTopic, q);
+        zeek_agent::send_subscribe(zeek_agent::HostBroadcastTopic, q);
     }
     else
     {
@@ -105,7 +105,7 @@ function insert_subscription(q: osquery::Query, host_list: vector of string, gro
         {
             if (host_list[j] != "")
             {
-                osquery::send_subscribe(fmt("%s/%s", osquery::HostIndividualTopic,host_list[j]), q);
+                zeek_agent::send_subscribe(fmt("%s/%s", zeek_agent::HostIndividualTopic,host_list[j]), q);
             }
         }
         # To specific group
@@ -113,18 +113,18 @@ function insert_subscription(q: osquery::Query, host_list: vector of string, gro
         {
             if (group_list[j] != "")
             {
-                osquery::send_subscribe(fmt("%s/%s", osquery::HostGroupTopic,group_list[j]), q);
+                zeek_agent::send_subscribe(fmt("%s/%s", zeek_agent::HostGroupTopic,group_list[j]), q);
             }
         }
     }
 }
 
-function remove_subscription(q: osquery::Query, host_list: vector of string, group_list: vector of string)
+function remove_subscription(q: zeek_agent::Query, host_list: vector of string, group_list: vector of string)
 {
         # Cancel internal subscription
         for ( j in subscriptions )
         {
-            if ( osquery::same_event(subscriptions[j]$query, q) )
+            if ( zeek_agent::same_event(subscriptions[j]$query, q) )
             {
                 # Don't have a delete for vector, so set it to no-op by leaving the event empty.
                 subscriptions[j]$query = [$query=""];
@@ -135,7 +135,7 @@ function remove_subscription(q: osquery::Query, host_list: vector of string, gro
         if (|host_list|<=1 && host_list[0]=="" && |group_list|<=1 && group_list[0]=="")
         {
             # To all if nothing specified
-            osquery::send_unsubscribe(osquery::HostBroadcastTopic, q);
+            zeek_agent::send_unsubscribe(zeek_agent::HostBroadcastTopic, q);
         }
         else
         {
@@ -144,7 +144,7 @@ function remove_subscription(q: osquery::Query, host_list: vector of string, gro
             {
                 if (host_list[j] != "")
                 {
-                    osquery::send_unsubscribe(fmt("%s/%s", osquery::HostIndividualTopic,host_list[j]), q);
+                    zeek_agent::send_unsubscribe(fmt("%s/%s", zeek_agent::HostIndividualTopic,host_list[j]), q);
                 }
             }
             # To specific group
@@ -152,18 +152,18 @@ function remove_subscription(q: osquery::Query, host_list: vector of string, gro
             {
                 if (group_list[j] != "")
                 {
-                    osquery::send_unsubscribe(fmt("%s/%s", osquery::HostGroupTopic,group_list[j]), q);
+                    zeek_agent::send_unsubscribe(fmt("%s/%s", zeek_agent::HostGroupTopic,group_list[j]), q);
                 }
             }
         }
 }
 
-function insert_execution(q: osquery::Query, host_list: vector of string, group_list: vector of string)
+function insert_execution(q: zeek_agent::Query, host_list: vector of string, group_list: vector of string)
 {
         if (|host_list|<=1 && host_list[0]=="" && |group_list|<=1 && group_list[0]=="")
         {
             # To all if nothing specified
-            osquery::send_execute(osquery::HostBroadcastTopic, q);
+            zeek_agent::send_execute(zeek_agent::HostBroadcastTopic, q);
         }
         else
         {
@@ -172,7 +172,7 @@ function insert_execution(q: osquery::Query, host_list: vector of string, group_
             {
                 if (host_list[j] != "")
                 {
-                    osquery::send_execute(fmt("%s/%s", osquery::HostIndividualTopic,host_list[j]), q);
+                    zeek_agent::send_execute(fmt("%s/%s", zeek_agent::HostIndividualTopic,host_list[j]), q);
                 }
             }
             # To specific group
@@ -180,7 +180,7 @@ function insert_execution(q: osquery::Query, host_list: vector of string, group_
             {
                 if (group_list[j] != "")
                 {
-                    osquery::send_execute(fmt("%s/%s", osquery::HostGroupTopic,group_list[j]), q);
+                    zeek_agent::send_execute(fmt("%s/%s", zeek_agent::HostGroupTopic,group_list[j]), q);
                 }
             }
         }
@@ -193,11 +193,11 @@ function insert_grouping(range_list: vector of subnet, group: string)
 
     for (host in hosts)
     {
-        local host_topic = fmt("%s/%s", osquery::HostIndividualTopic,host);
+        local host_topic = fmt("%s/%s", zeek_agent::HostIndividualTopic,host);
         local skip_host = F;
 
         local hostIPs: vector of addr;
-        hook osquery::getIPsOfHost(host, hostIPs);
+        hook zeek_agent::getIPsOfHost(host, hostIPs);
         for (j in hostIPs)
         {
             if (skip_host) break;
@@ -206,8 +206,8 @@ function insert_grouping(range_list: vector of subnet, group: string)
             if (hostIPs[j] in range_list[i])
             {
                 local new_group = group;
-                osquery::log_osquery("info", host, fmt("Joining new group %s", new_group));
-                osquery::send_join( host_topic, new_group );
+                zeek_agent::log("info", host, fmt("Joining new group %s", new_group));
+                zeek_agent::send_join( host_topic, new_group );
                 host_groups[host][|host_groups[host]|] = new_group;
                 add groups[new_group];
                 skip_host = T;

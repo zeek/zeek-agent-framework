@@ -1,11 +1,11 @@
 @load base/frameworks/broker
 @load base/frameworks/logging
 
-module osquery;
+module zeek_agent;
 
 export {
 
-    ## Subscribe to an event from clients. Whenever an osquery client connects to us, we'll subscribe to all matching
+    ## Subscribe to an event from clients. Whenever an zeek-agent connects to us, we'll subscribe to all matching
     ## activity from it.
     ##
     ## The query is a mandatory parameter. It is send to a specific host and/or group (if specified). Otherwise (if
@@ -27,7 +27,7 @@ export {
     ## group: A specific group to address (optional).
     global unsubscribe: function(q: Query, host: string &default="", group: string &default="");
 
-    ## Subscribe to multiple events. Whenever an osquery client connects to us, we'll subscribe to all matching activity
+    ## Subscribe to multiple events. Whenever an zeek-agent connects to us, we'll subscribe to all matching activity
     ## from it.
     ##
     ## The queries is an mandatory parameter and contains 1 or more queries. Each of them is send to the specified hosts
@@ -72,7 +72,7 @@ export {
     ## group_list: Specific groups to address per query (optional).
     global execute_multiple: function(q: Query, host_list: vector of string &default=vector(""), group_list: vector of string &default=vector(""));
 
-    ## Make a subnet to be addressed by a group. Whenever an osquery client connects to us, we'll instruct it to join
+    ## Make a subnet to be addressed by a group. Whenever an zeek-agent connects to us, we'll instruct it to join
     ## the given group.
     ##
     ## range: the subnet that is addressed.
@@ -85,7 +85,7 @@ export {
     ## group: the group hosts should leave.
     global leave: function(range: subnet, group: string);
 
-    ## Make a subnets to be addressed by a group. Whenever an osquery client connects to us, we'll instruct it to join
+    ## Make a subnets to be addressed by a group. Whenever an zeek-agent connects to us, we'll instruct it to join
     ## the given groups.
     ##
     ## range_list: the subnets that are addressed.
@@ -108,8 +108,8 @@ function subscribe(q: Query, host: string, group: string)
 
 function subscribe_multiple(q: Query, host_list: vector of string, group_list: vector of string)
 	{
-	osquery::share_subscription(q, host_list, group_list);
-	osquery::insert_subscription(q, host_list, group_list);
+	zeek_agent::share_subscription(q, host_list, group_list);
+	zeek_agent::insert_subscription(q, host_list, group_list);
 	}
 
 function unsubscribe(q: Query, host: string, group: string)
@@ -121,8 +121,8 @@ function unsubscribe(q: Query, host: string, group: string)
 
 function unsubscribe_multiple(q: Query, host_list: vector of string, group_list: vector of string)
 	{
-	osquery::unshare_subscription(q, host_list, group_list);
-	osquery::remove_subscription(q, host_list, group_list);
+	zeek_agent::unshare_subscription(q, host_list, group_list);
+	zeek_agent::remove_subscription(q, host_list, group_list);
 	}
 
 function execute(q: Query, host: string, group: string)
@@ -134,8 +134,8 @@ function execute(q: Query, host: string, group: string)
 
 function execute_multiple(q: Query, host_list: vector of string, group_list: vector of string)
 	{
-	osquery::share_execution(q, host_list, group_list);
-	osquery::insert_execution(q, host_list, group_list);
+	zeek_agent::share_execution(q, host_list, group_list);
+	zeek_agent::insert_execution(q, host_list, group_list);
 	}
 
 function join(range: subnet, group: string)
@@ -146,8 +146,8 @@ function join(range: subnet, group: string)
 
 function join_multiple(range_list: vector of subnet, group: string)
 	{
-	osquery::share_grouping(range_list, group);
-	osquery::insert_grouping(range_list, group);
+	zeek_agent::share_grouping(range_list, group);
+	zeek_agent::insert_grouping(range_list, group);
 	}
 
 function leave(range: subnet, group: string)
@@ -158,8 +158,8 @@ function leave(range: subnet, group: string)
 
 function leave_multiple(range_list: vector of subnet, group: string)
 	{
-	osquery::unshare_grouping(range_list, group);
-	osquery::remove_grouping(range_list, group);
+	zeek_agent::unshare_grouping(range_list, group);
+	zeek_agent::remove_grouping(range_list, group);
 	}
 
 event Broker::peer_added(endpoint: Broker::EndpointInfo, msg: string)

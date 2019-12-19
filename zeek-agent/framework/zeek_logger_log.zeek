@@ -1,6 +1,6 @@
 #! Logs socket events activity
 
-module osquery::logging::table_logger;
+module zeek_agent::logging::table_logger;
 
 export {
 	redef enum Log::ID += { LOG };
@@ -15,7 +15,7 @@ export {
 }
 
 @if ( !Cluster::is_enabled() || Cluster::local_node_type() == Cluster::MANAGER )
-event osquery::log_added(t: time, host_id: string, event_time :int, severity :string, message :string)
+event zeek_agent::log_added(t: time, host_id: string, event_time :int, severity :string, message :string)
 	{
 	local info: Info = [$t=t,
 			    $host=host_id,

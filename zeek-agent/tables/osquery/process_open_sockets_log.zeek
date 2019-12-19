@@ -1,6 +1,6 @@
 #! Logs process open sockets activity
 
-module osquery::logging::table_process_open_sockets;
+module zeek_agent::logging::table_process_open_sockets;
 
 export {
         redef enum Log::ID += { LOG };
@@ -44,5 +44,5 @@ event process_open_socket_added(t: time, host_id: string, pid: int, fd: int, fam
 @endif
 
 event zeek_init() {
-        Log::create_stream(LOG, [$columns=Info, $path="osq-process_open_sockets"]);
+        Log::create_stream(LOG, [$columns=Info, $path="agent-process_open_sockets"]);
 }

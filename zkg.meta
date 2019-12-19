@@ -1,7 +1,7 @@
 [package]
 version = 0.4-dev
-description = Osquery script framework for communicating with osquery endpoints
-tags = osquery
-script_dir = osquery-framework
+description = Script framework for communicating with zeek-agent endpoints
+tags = zeek-agent,osquery
+script_dir = zeek-agent
 depends =
-  zeek >=3.0.0-rc1
+  zeek >=3.0.0
