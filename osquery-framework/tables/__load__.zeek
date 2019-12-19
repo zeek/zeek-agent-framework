@@ -16,5 +16,7 @@
 @load ./process_open_sockets_log
 @load ./socket_events
 @load ./socket_events_log
+@load ./zeek_logger
+@load ./zeek_logger_log
 @load ./users
 @load ./users_log
