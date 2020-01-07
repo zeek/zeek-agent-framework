@@ -178,9 +178,14 @@ hook osquery::add_host_addr(host_id: string, ip: addr) {
 }
 
 @if ( !Cluster::is_enabled() || Cluster::local_node_type() == Cluster::MANAGER )
-event osquery::host_new(peer_name: string, host_id: string, group_list: vector of string)
+event osquery::host_new(peer_name: string, host_id: string, group_list: vector of string, zeek_agent_version: string, zeek_agent_edition: string)
 {
-    osquery::log_osquery("info", host_id, fmt("Osquery host connected (%s announced as: %s)", peer_name, host_id));
+    # 'standalone' edition only comes with built-in tables
+    # 'osquery' edition can export additional tables IF osquery is connected
+    osquery::log_osquery("info", host_id, fmt("Zeek Agent v%s (%s) host connected (%s announced as: %s)", zeek_agent_version, zeek_agent_edition, peer_name, host_id));
+
+    #TODO: Do not load the osquery tables if the client edition is set to 'standalone'
+    # ...
 
     # Internal client tracking
     peer_to_host[peer_name] = host_id;
