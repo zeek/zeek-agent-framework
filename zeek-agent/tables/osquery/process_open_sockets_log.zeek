@@ -41,5 +41,5 @@ event zeek_agent::process_open_sockets_added(t: time, host_id: string, pid: int,
 
 event zeek_init()
 {
-        Log::create_stream(LOG, [$columns=Info, $path="agent-process_open_sockets"]);
+	Log::create_stream(LOG, [$columns=Info, $path="agent-process_open_sockets"]);
 }
