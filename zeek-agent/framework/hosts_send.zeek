@@ -1,38 +1,38 @@
 @load base/frameworks/broker
 @load base/frameworks/logging
 
-module osquery;
+module zeek_agent;
 
 export
 {
-  ## The osquery logging stream identifier.
+  ## The zeek-agent logging stream identifier.
   redef enum Log::ID += { LOG_SEND };
 
-  ## Send a message to an osquery host or group of hosts to subscribe to a query
+  ## Send a message to an zeek-agent or group of hosts to subscribe to a query
   ##
   ## topic: The topic of the host or group to address
   ## query: The query to subscribe to
-  global send_subscribe: function(topic: string, query: osquery::Query);
+  global send_subscribe: function(topic: string, query: zeek_agent::Query);
 
-  ## Send a message to an osquery host or group of hosts to unsubscribe from a query
+  ## Send a message to an zeek-agent or group of hosts to unsubscribe from a query
   ##
   ## topic: The topic of the host or group to address
   ## query: The query to unsubscribe from
-  global send_unsubscribe: function(topic: string, query: osquery::Query);
+  global send_unsubscribe: function(topic: string, query: zeek_agent::Query);
 
-  ## Send a message to an osquery host or group of hosts to execute a query
+  ## Send a message to an zeek-agent or group of hosts to execute a query
   ##
   ## topic: The topic of the host or group to address
   ## query: The query to execute
-  global send_execute: function(topic: string, q: osquery::Query);
+  global send_execute: function(topic: string, q: zeek_agent::Query);
 
-  ## Send a message to an osquery host or group of hosts to join a group
+  ## Send a message to an zeek-agent or group of hosts to join a group
   ##
   ## host_topic: The topic of the host or group to address
   ## group: The group to join
   global send_join: function(host_topic: string, group: string);
 
-  ## Send a message to an osquery host or group of hosts to leave a group
+  ## Send a message to an zeek-agent or group of hosts to leave a group
   ##
   ## host_topic: The topic of the host or group to address
   ## group: The group to leave
@@ -54,18 +54,18 @@ global host_join: event(group: string);
 # Sent by us to hosts for leaving a group.
 global host_leave: event(group: string);
 
-function send_subscribe(topic: string, query: osquery::Query)
+function send_subscribe(topic: string, query: zeek_agent::Query)
 {
     local ev_name = split_string(fmt("%s", query$ev), /\n/)[0];
     local host_topic = topic;
 
-    osquery::log_osquery("debug", topic, fmt("%s event %s() for query '%s'", "Subscribing to", ev_name, query$query), LOG_SEND);
+    zeek_agent::log("debug", topic, fmt("%s event %s() for query '%s'", "Subscribing to", ev_name, query$query), LOG_SEND);
 
     local update_type = "BOTH";
-    if ( query$utype == osquery::ADD )
+    if ( query$utype == zeek_agent::ADD )
         update_type = "ADDED";
 
-    if ( query$utype == osquery::REMOVE )
+    if ( query$utype == zeek_agent::REMOVE )
         update_type = "REMOVED";
 
     local cookie = query$cookie;
@@ -83,18 +83,18 @@ function send_subscribe(topic: string, query: osquery::Query)
     Broker::publish(host_topic, ev_args);
 }
 
-function send_unsubscribe(topic: string, query: osquery::Query)
+function send_unsubscribe(topic: string, query: zeek_agent::Query)
 {
     local ev_name = split_string(fmt("%s", query$ev), /\n/)[0];
     local host_topic = topic;
 
-    osquery::log_osquery("debug", topic, fmt("%s event %s() for query '%s'", "Unsubscribing from", ev_name, query$query), LOG_SEND);
+    zeek_agent::log("debug", topic, fmt("%s event %s() for query '%s'", "Unsubscribing from", ev_name, query$query), LOG_SEND);
 
     local update_type = "BOTH";
-    if ( query$utype == osquery::ADD )
+    if ( query$utype == zeek_agent::ADD )
         update_type = "ADDED";
 
-    if ( query$utype == osquery::REMOVE )
+    if ( query$utype == zeek_agent::REMOVE )
         update_type = "REMOVED";
 
     local cookie = query$cookie;
@@ -111,12 +111,12 @@ function send_unsubscribe(topic: string, query: osquery::Query)
     Broker::publish(host_topic, ev_args);
 }
 
-function send_execute(topic: string, q: osquery::Query)
+function send_execute(topic: string, q: zeek_agent::Query)
 {
     local ev_name = split_string(fmt("%s", q$ev), /\n/)[0];
     local host_topic = topic;
 
-    osquery::log_osquery("debug", topic, fmt("%s event %s() for query '%s'", "Executing", ev_name, q$query), LOG_SEND);
+    zeek_agent::log("debug", topic, fmt("%s event %s() for query '%s'", "Executing", ev_name, q$query), LOG_SEND);
 
     local cookie = q$cookie;
 
@@ -131,19 +131,19 @@ function send_execute(topic: string, q: osquery::Query)
 
 function send_join(host_topic: string, group: string)
 {
-    osquery::log_osquery("info", host_topic, fmt("%s group '%s'", "Joining", group), LOG_SEND);
+    zeek_agent::log("info", host_topic, fmt("%s group '%s'", "Joining", group), LOG_SEND);
     local ev_args = Broker::make_event(host_join, group);
     Broker::publish(host_topic, ev_args);
 }
 
 function send_leave(host_topic: string, group: string)
 {
-    osquery::log_osquery("info", host_topic, fmt("%s group '%s'", "Leaving", group), LOG_SEND);
+    zeek_agent::log("info", host_topic, fmt("%s group '%s'", "Leaving", group), LOG_SEND);
     local ev_args = Broker::make_event(host_leave, group);
     Broker::publish(host_topic, ev_args);
 }
 
 event zeek_init()
 {
-  Log::create_stream(LOG_SEND, [$columns=osquery::Info, $path="osquery_hosts"]);
+  Log::create_stream(LOG_SEND, [$columns=zeek_agent::Info, $path="zeek-agent-hosts"]);
 }

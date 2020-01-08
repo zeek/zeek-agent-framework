@@ -1,6 +1,6 @@
 #! Logs socket events activity
 
-module osquery::logging::table_socket_events;
+module zeek_agent::logging::table_socket_events;
 
 export {
         redef enum Log::ID += { LOG };
@@ -23,7 +23,7 @@ export {
 }
 
 @if ( !Cluster::is_enabled() || Cluster::local_node_type() == Cluster::MANAGER )
-event osquery::socket_event_added(t: time, host_id: string, action: string, pid: int, fd: int, path: string, family: int, local_address: string, remote_address: string, local_port: int, remote_port: int, start_time: int, success: int) {
+event zeek_agent::socket_event_added(t: time, host_id: string, action: string, pid: int, fd: int, path: string, family: int, local_address: string, remote_address: string, local_port: int, remote_port: int, start_time: int, success: int) {
         if (action == "connect" || local_address == "") {
           local_address = "0.0.0.0";
         }
@@ -52,5 +52,5 @@ event osquery::socket_event_added(t: time, host_id: string, action: string, pid:
 @endif
 
 event zeek_init() {
-        Log::create_stream(LOG, [$columns=Info, $path="osq-socket_events"]);
+        Log::create_stream(LOG, [$columns=Info, $path="agent-socket_events"]);
 }

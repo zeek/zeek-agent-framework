@@ -1,6 +1,6 @@
 #! Query processes activity.
 
-module osquery::logging::table_processes;
+module zeek_agent::logging::table_processes;
 
 export {
         redef enum Log::ID += { LOG };
@@ -24,7 +24,7 @@ export {
 }
 
 @if ( !Cluster::is_enabled() || Cluster::local_node_type() == Cluster::MANAGER )
-event osquery::process_added(t: time, host_id: string, pid: int, name: string, path: string, cmdline: string, cwd: string, root: string, uid: int, gid: int, on_disk: int, start_time: int, parent: int, pgroup: int) {
+event zeek_agent::process_added(t: time, host_id: string, pid: int, name: string, path: string, cmdline: string, cwd: string, root: string, uid: int, gid: int, on_disk: int, start_time: int, parent: int, pgroup: int) {
         local info: Info = [
 		$t=t,
 		$host=host_id,
@@ -47,5 +47,5 @@ event osquery::process_added(t: time, host_id: string, pid: int, name: string, p
 @endif
 
 event zeek_init() {
-        Log::create_stream(LOG, [$columns=Info, $path="osq-processes"]);
+        Log::create_stream(LOG, [$columns=Info, $path="agent-processes"]);
 }

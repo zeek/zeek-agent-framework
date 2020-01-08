@@ -1,5 +1,5 @@
 
-module osquery;
+module zeek_agent;
 
 export {
 	# Interval in seconds to execute scheduled queries on hosts

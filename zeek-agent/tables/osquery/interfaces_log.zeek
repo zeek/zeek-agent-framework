@@ -1,6 +1,6 @@
 #! Logs interfaces activity.
 
-module osquery::logging::table_interfaces;
+module zeek_agent::logging::table_interfaces;
 
 export {
 	# Logging
@@ -17,7 +17,7 @@ export {
 }
 
 @if ( !Cluster::is_enabled() || Cluster::local_node_type() == Cluster::MANAGER )
-event osquery::interface_added(t: time, host_id: string, interface: string, mac: string, ip: string, mask: string) {
+event zeek_agent::interface_added(t: time, host_id: string, interface: string, mac: string, ip: string, mask: string) {
         local info: Info = [
 		$t=t,
 		$host=host_id,
@@ -32,5 +32,5 @@ event osquery::interface_added(t: time, host_id: string, interface: string, mac:
 @endif
 
 event zeek_init() {
-        Log::create_stream(LOG, [$columns=Info, $path="osq-interfaces"]);
+        Log::create_stream(LOG, [$columns=Info, $path="agent-interfaces"]);
 }

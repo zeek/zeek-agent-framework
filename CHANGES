@@ -1,4 +1,16 @@
 
+0.4-9 | 2020-01-08 09:14:19 +0000
+
+  * Rename from osquery framework to zeek-agent. (Robin Sommer, Corelight)
+
+  * Rewrite the process_open_sockets scripts. (Alessandro Gario)
+
+  * Print Zeek Agent version and edition on connection. (Alessandro Gario)
+
+  * Updates the table scripts for socket_events, zeek_logger. (Alessandro Gario)
+
+  * Update README. (Robin Sommer, Corelight)
+
 0.4 | 2019-09-23 10:28:33 +0000
 
   * Initial import.

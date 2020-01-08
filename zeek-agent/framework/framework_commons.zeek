@@ -1,4 +1,4 @@
-module osquery;
+module zeek_agent;
 
 export {
 
@@ -17,13 +17,13 @@ export {
     ## The remote port Broker is connecting to
     const backend_port: port = 9999/tcp &redef;
 
-    # Topic prefix used for all topics in osquery communication
-    const TopicPrefix: string = "/bro/osquery" &redef;
+    # Topic prefix used for all topics in zeek-agent communication
+    const TopicPrefix: string = "/zeek/zeek-agent" &redef;
 
     # Topic for individual bros
-    const BroIndividualTopic: string = fmt("%s/bro",TopicPrefix) &redef;
+    const BroIndividualTopic: string = fmt("%s/zeek",TopicPrefix) &redef;
     # Topic to address all bro
-    const BroBroadcastTopic: string = fmt("%s/bros",TopicPrefix) &redef;
+    const BroBroadcastTopic: string = fmt("%s/zeeks",TopicPrefix) &redef;
     # Individual channel of this bro instance
     const BroID_Topic: string = fmt("%s/%s",BroIndividualTopic,endpoint_name) &redef; 
 
@@ -35,20 +35,20 @@ export {
     const HostBroadcastTopic: string = fmt("%s/hosts",TopicPrefix) &redef;
 
     # Topic to which bros send announce messages
-    const BroAnnounceTopic: string = fmt("%s/bro_announce",TopicPrefix) &redef;
+    const BroAnnounceTopic: string = fmt("%s/zeek_announce",TopicPrefix) &redef;
     # Topic to which hosts send announce messages
     const HostAnnounceTopic: string = fmt("%s/host_announce",TopicPrefix) &redef;
 
-    ## The osquery logging stream identifier.
+    ## The zeek-agent logging stream identifier.
     redef enum Log::ID += { LOG };
 
-    ## A record type containing the column fields of the osquery log.
+    ## A record type containing the column fields of the zeek-agent log.
     type Info: record {
-        ## The network time at which a osquery activity occurred.
+        ## The network time at which a zeek-agent activity occurred.
         ts:                  time   &log;
         ## The scope of the message. Can be 'local' to indicating a message relevant for
         ## this node only. 'bro' indicates interfaction with other bro nodes and
-        ## 'osquery' indicates interaction with osquery hosts.
+        ## 'zeek-agent' indicates interaction with zeek-agents.
         source:              string &log;
         ## The peer name (if any) with which a communication event is
         ## concerned.
@@ -59,7 +59,7 @@ export {
         message:             string &log;
     };
 
-    ## Type defining the type of osquery change we are interested in.
+    ## Type defining the type of zeek-agent change we are interested in.
     type UpdateType: enum {
         ADD,	##< Report new elements.
         REMOVE,	##< Report removed element.
@@ -69,7 +69,7 @@ export {
 
     ## Type defining a SQL query and schedule/execution parameters to be send to hosts.
     type Query: record {
-        ## The osquery SQL query selecting the activity to subscribe to.
+        ## The zeek-agent SQL query selecting the activity to subscribe to.
         query: string;
         ## The type of update to report.
         utype: UpdateType &default=ADD;
@@ -90,14 +90,14 @@ export {
         cookie: string &optional;
     };
 
-    ## Event that signals the connection of a new osquery host
+    ## Event that signals the connection of a new zeek-agent
     ##
-    ## client_id: An id that uniquely identifies an osquery host
+    ## client_id: An id that uniquely identifies an zeek-agent
     global host_connected: event (host_id: string);
 
-    ## Event that signals the disconnection of an osquery host
+    ## Event that signals the disconnection of an zeek-agent
     ##
-    ## client_id: An id that uniquely identifies an osquery host
+    ## client_id: An id that uniquely identifies an zeek-agent
     global host_disconnected: event (host_id: string);
 
     ## Event that signals the connection of a new bro
@@ -123,12 +123,12 @@ export {
     ## msg: the message content
     global log_bro: function(level: string, peer: string, msg: string, log: any &default=LOG);
     
-    ## Log a message with scope including osquery nodes
+    ## Log a message with scope including zeek-agent nodes
     ##
     ## level: the severity of the message
-    ## peer: the identifier for the osquery host or group 
+    ## peer: the identifier for the zeek-agent or group 
     ## msg: the message content
-    global log_osquery: function(level: string, peer: string, msg: string, log: any &default=LOG);
+    global zeek_agent::log: function(level: string, peer: string, msg: string, log: any &default=LOG);
 
     ## Comparison of two queries to be equal
     global same_event: function (q1: Query, q2: Query): bool;
@@ -160,7 +160,7 @@ function log_bro(level: string, peer: string, msg: string, log: any)
     );
 }
 
-function log_osquery(level: string, peer: string, msg: string, log: any)
+function zeek_agent::log(level: string, peer: string, msg: string, log: any)
 {
     Log::write(log,
         [
@@ -199,5 +199,5 @@ function same_event(q1: Query, q2: Query) : bool
 
 event zeek_init()
 {
-    Log::create_stream(LOG, [$columns=Info, $path="osquery"]);
+    Log::create_stream(LOG, [$columns=Info, $path="zeek-agent"]);
 }

@@ -1,6 +1,6 @@
 #! Logs process open sockets activity
 
-module osquery::logging::table_process_open_sockets;
+module zeek_agent::logging::table_process_open_sockets;
 
 export
 {
@@ -21,7 +21,7 @@ export
 }
 
 @if (!Cluster::is_enabled() || Cluster::local_node_type() == Cluster::MANAGER)
-event osquery::process_open_sockets_added(t: time, host_id: string, pid: int, fd: int, family: int, protocol: int, local_address: string, remote_address: string, local_port: int, remote_port: int)
+event zeek_agent::process_open_sockets_added(t: time, host_id: string, pid: int, fd: int, family: int, protocol: int, local_address: string, remote_address: string, local_port: int, remote_port: int)
 {
 	local info: Info = [$t=t,
 			    $host_id=host_id,
@@ -41,5 +41,5 @@ event osquery::process_open_sockets_added(t: time, host_id: string, pid: int, fd
 
 event zeek_init()
 {
-	Log::create_stream(LOG, [$columns=Info, $path="osq-process_open_sockets"]);
+        Log::create_stream(LOG, [$columns=Info, $path="agent-process_open_sockets"]);
 }
