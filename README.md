@@ -2,10 +2,10 @@
 # About
 
 This Zeek script framework communicates with the [Zeek
-Agent](https://github.com/zeek/osquery-extension) to perform live
-queries against the agent's tables and then incorporat the results
+Agent](https://github.com/zeek/zeek-agent) to perform live
+queries against the agent's tables and then incorporate the results
 back into Zeek's processing & logging. In addition to tables built in,
-the agent can connect to [osquery](https://osquery.io) to retrieve any
+the agent can connect to [Osquery](https://osquery.io) to retrieve any
 of the host data provided there.
 
 *Note*: This framework is still a work in progress and expected to
@@ -18,7 +18,7 @@ The framework requires Zeek 3.0, which you can download and install
 per the instructions on the [Zeek web site](https://zeek.org/download).
 
 You will also need to install the Zeek Agent itself, as well as
-optionally osquery, according to [these
+optionally Osquery, according to [these
 instructions](https://github.com/zeek/zeek-agent-framework).
 
 # Installation
@@ -56,44 +56,15 @@ file `zeek-agent.log` that records the hosts connecting to Zeek:
 
     # cat zeek-agent.log
     #fields    ts       source  peer        level   message
-    1576768875.018249	local	BroMaster	info	Subscribing to bro announce topic /zeek/zeek-agent/bro_announce
-    1576768875.018249	local	BroMaster	info	Subscribing to bro individual topic /zeek/zeek-agent/bro/C6EAF3CFDF46831E2D9103E5A1C48F78AD873A00#10223
-    1576768877.709030	local	BroMaster	info	Incoming connection established from C6EAF3CFDF46831E2D9103E5A1C48F78AD873A3C#7503
+    1576768875.018249	local	ZeekMaster	info	Subscribing to zeek announce topic /zeek/zeek-agent/zeek_announce
+    1576768875.018249	local	ZeekMaster	info	Subscribing to zeek individual topic /zeek/zeek-agent/zeek/C6EAF3CFDF46831E2D9103E5A1C48F78AD873A00#10223
+    1576768877.709030	local	ZeekMaster	info	Incoming connection established from C6EAF3CFDF46831E2D9103E5A1C48F78AD873A3C#7503
 
 You won't see much more at first as there's nothing sending queries to
-the endhost yet. However, there's an additional set of scripts coming
-with the framework that installs queries against selected tables and
-turns the results into Zeek log files.
+the endhost yet. Check out the `examples/` directory for scripts that 
+are using the built in (currently Linux audit based) and Osquery based
+functionality. 
 
-To enable the querying the agent's built-in tables (which are
-currently all audit-based), load the `zeek-agent/tables` module:
-
-    # zeek zeek-agent/tables
-
-To enable these permanently, put `@load zeek-agent/tables` into your
-`local.zeek` file.
-
-Once enabled, you'll start seeing these additional Zeek log files:
-
-- `agent-process_events.log`: Records processes running on the hosts, as reported by Linux's audit system.
-- `agent-socket_events.log`: Records sockets being opened, as reported by Linux's audit system.
-
-If you have osquery installed and built the Zeek Agent with
-corresponding support, you can enable additional osquery-based tables
-by loading `zeek-agent/tables/osquery`. You'll then start seeing:
-
-- `agent-interface.log`: Records network interfaces added to the hosts
-- `agent-listening_ports.log`: Records network ports listening for incoming connections.
-- `agent-mounts.log`: Records devices being mounted.
-- `agent-prcocesses.log`: Records new processes (non-evented, meaning short-lived instances may be missed)
-- `agent-process_open_sockets`: Records sockets being opened (non-evented, meaning short-lived instances may be missed)
-- `agent-users`: Records users being added to a host.
-
-In addition to all these, there are two more logs recording Zeek Agent
-activity once the framework is loaded:
-
-- `zeek-agent-hosts.log`: Records the hosts connecting to Zeek with their subscriptions.
-- `zeek-agent-logger.log`: Aggregates the agent-side logs, as also recorded by the Zeek Agent on the endhosts themselves.
 
 # Credits
 
