@@ -18,6 +18,8 @@ event zeek_agent::table_logger(resultInfo: zeek_agent::ResultInfo, event_time: i
 
 event zeek_init()
 	{
-	local query = [$ev=zeek_agent::table_logger, $query="SELECT time, severity, message FROM zeek_logger", $utype=zeek_agent::BOTH, $inter=zeek_agent::QUERY_INTERVAL];
+	local query = zeek_agent::Query($ev=zeek_agent::table_logger, 
+	                               $query="SELECT time, severity, message FROM zeek_logger",
+	                               $utype=zeek_agent::BOTH);
 	zeek_agent::subscribe(query);
 	}
