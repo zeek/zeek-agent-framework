@@ -1,4 +1,4 @@
-#! Logs socket events activity
+##! Logs socket events activity
 
 @load zeek-agent
 
@@ -23,7 +23,11 @@ export {
 	};
 }
 
-event Agent_SocketOpen::socket_open(result: zeek_agent::ResultInfo, action: string, pid: int, fd: int, path: string, local_address: string, remote_address: string, local_port: int, remote_port: int, host_time: int, success: int)
+event Agent_SocketOpen::socket_open(result: zeek_agent::Result,
+                                    action: string, pid: int, fd: int, path: string,
+                                    local_address: string, remote_address: string,
+                                    local_port: int, remote_port: int,
+                                    host_time: int, success: int)
 	{
 	if ( result$utype != zeek_agent::ADD )
 		return;

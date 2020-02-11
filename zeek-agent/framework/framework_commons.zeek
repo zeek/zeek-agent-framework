@@ -14,7 +14,7 @@ export {
 	const backend_ip = "0.0.0.0" &redef;
 	
 	## The remote port Broker is connecting to
-	const backend_port: port = 9999/tcp &redef;
+	const backend_port = 9999/tcp &redef;
 	
 	# Topic prefix used for all topics in zeek-agent communication
 	const TopicPrefix = "/zeek/zeek-agent" &redef;
@@ -82,7 +82,7 @@ export {
 	};
 	
 	## Type defining the event header of responses
-	type ResultInfo: record {
+	type Result: record {
 		host:   string;
 		utype:  UpdateType;
 		cookie: string &optional;

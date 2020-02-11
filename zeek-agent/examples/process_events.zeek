@@ -1,27 +1,54 @@
-#! Logs process events activity
+##! Logs process events activity
 
 @load zeek-agent
 
-module zeek_agent;
+module Agent_ProcessStart;
 
 export {
-	## Event to indicate that a new process was created on a host
-	##
-	## <params missing>
-	global process_event_added: event(t: time, host_id: string, pid: int, path: string, cmdline: string, 
-				 cwd: string, uid: int, gid: int, start_time: int, parent: int);
+	redef enum Log::ID += { LOG };
+
+	type Info: record {
+		ts:         time   &log;
+		host_ts:    time   &log;
+		host:       string &log;
+		pid:        int    &log;
+		path:       string &log;
+		cmdline:    string &log;
+		cwd:        string &log;
+		uid:        int    &log;
+		gid:        int    &log;
+		parent:     int    &log;
+	};
 }
 
-event zeek_agent::table_process_events(resultInfo: zeek_agent::ResultInfo,
-		pid: int, path: string, cmdline: string, cwd: string, uid: int, gid: int,
-		start_time: int, parent: int) {
-	if (resultInfo$utype == zeek_agent::ADD) {
-		event zeek_agent::process_event_added(network_time(), resultInfo$host, pid, path, cmdline, cwd, uid, gid, start_time, parent);
+event Agent_ProcessStart::process_start(result: zeek_agent::Result,
+		pid: int, path: string, cmdline: string, cwd: string, 
+		uid: int, gid: int, host_time: int, parent: int)
+	{
+	if ( result$utype != zeek_agent::ADD )
+		return;
+
+	local host_ts = double_to_time(host_time);
+	local info = Info($ts = network_time(),
+	                  $host_ts = host_ts,
+	                  $host = result$host,
+	       	          $pid = pid,
+	                  $path = path,
+	                  $cmdline = cmdline,
+	                  $cwd = cwd,
+	                  $uid = uid,
+	                  $gid = gid,
+	                  $parent = parent);
+
+	Log::write(LOG, info);
 	}
 
-}
-
-event zeek_init() {
-	local query = [$ev=zeek_agent::table_process_events,$query="SELECT pid, path, cmdline, cwd, uid, gid, time, parent FROM process_events", $utype=zeek_agent::ADD, $inter=zeek_agent::QUERY_INTERVAL];
+event zeek_init() &priority=10
+	{
+	Log::create_stream(LOG, [$columns=Info, $path="agent-process_events"]);
+	
+	local query = zeek_agent::Query($ev=Agent_ProcessStart::process_start,
+	                                $query="SELECT pid, path, cmdline, cwd, uid, gid, time, parent FROM process_events",
+	                                $utype=zeek_agent::ADD);
 	zeek_agent::subscribe(query);
-}
+	}

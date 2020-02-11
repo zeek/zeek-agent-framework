@@ -7,13 +7,13 @@ export {
 	global log_removed: event(t: time, host_id: string, event_time: int, severity: string, message: string);
 }
 
-event zeek_agent::table_logger(resultInfo: zeek_agent::ResultInfo, event_time: int, severity: string, message: string)
+event zeek_agent::table_logger(result: zeek_agent::Result, event_time: int, severity: string, message: string)
 	{
-	if ( resultInfo$utype == zeek_agent::ADD )
-		event zeek_agent::log_added(network_time(), resultInfo$host, event_time, severity, message);
+	if ( result$utype == zeek_agent::ADD )
+		event zeek_agent::log_added(network_time(), result$host, event_time, severity, message);
 
-	if ( resultInfo$utype == zeek_agent::REMOVE)
-		event zeek_agent::log_removed(network_time(), resultInfo$host, event_time, severity, message);
+	if ( result$utype == zeek_agent::REMOVE)
+		event zeek_agent::log_removed(network_time(), result$host, event_time, severity, message);
 	}
 
 event zeek_init()
