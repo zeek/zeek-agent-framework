@@ -10,11 +10,10 @@ of the host data provided there.
 
 *Note*: This framework is still a work in progress and expected to
 change further in terms of API, functionality, and implementation.
-It's not also not been fully "Zeekified" yet.
 
 # Prerequisites
 
-The framework requires Zeek 3.0, which you can download and install
+The framework requires Zeek 3.0+, which you can download and install
 per the instructions on the [Zeek web site](https://zeek.org/download).
 
 You will also need to install the Zeek Agent itself, as well as
