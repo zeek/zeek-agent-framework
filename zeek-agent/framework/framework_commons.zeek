@@ -59,10 +59,13 @@ export {
 	
 	## Type defining the type of zeek-agent change we are interested in.
 	type UpdateType: enum {
-		ADD,	##< Report new elements.
-		REMOVE,	##< Report removed element.
-		BOTH,	##< Report both new and removed elements.
-		SNAPSHOT##< Report the current status at query time.
+		## Report the initial set of results. For purposes of scheduled queries,
+		## this behaves the same as "BOTH". It is primarily used when recieiving
+		INITIAL,
+		ADD,      ##< Report new elements.
+		REMOVE,   ##< Report removed element.
+		BOTH,     ##< Report both new and removed elements.
+		SNAPSHOT  ##< Report the current status at query time.
 	};
 	
 	## Type defining a SQL query and schedule/execution parameters to be send to hosts.

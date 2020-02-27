@@ -2,32 +2,45 @@
 
 @load zeek-agent
 
-module zeek_agent;
+module AgentMounts;
 
 export {
-	## Event to indicate that a new mount was created on a host
-	##
-	## <params missing>
-	global mount_added: event(t: time, host_id: string, device: string, device_alias: string, path: string, typ: string, blocks_size: int, blocks: int, flags: string);
-	
-	## Event to indicate that an existing mount was removed on a host
-	##
-	## <params missing>
-	global mount_removed: event(t: time, host_id: string, device: string, device_alias: string, path: string, typ: string, blocks_size: int, blocks: int, flags: string);
+	redef enum Log::ID += { LOG };
+
+	type Info: record {
+		ts:     time   &log;
+		host:   string &log;
+		## One of "existing_mount", "new_mount" or "unmount".
+		## "mount" implies that the disk was already mounted when the agent reported in.
+		## "new_mount" implies that the disk was just mounted when the event was sent.
+		## "umount" implies the disk was unmounted when the event was sent.
+		action: string &log;
+		path:   string &log;
+	};
 }
 
-event zeek_agent::table_mounts(resultInfo: zeek_agent::ResultInfo,
-		device: string, device_alias: string, path: string, typ: string,
-		blocks_size: int, blocks: int, flags: string) {
-	if ( resultInfo$utype == zeek_agent::ADD ) {
-		event zeek_agent::mount_added(network_time(), resultInfo$host, device, device_alias, path, typ, blocks_size, blocks, flags);
-	}
-	if ( resultInfo$utype == zeek_agent::REMOVE ) {
-		event zeek_agent::mount_added(network_time(), resultInfo$host, device, device_alias, path, typ, blocks_size, blocks, flags);
-	}
-}
+const mount_lookup = {
+	[zeek_agent::INITIAL] = "existing_mount",
+	[zeek_agent::ADD] = "new_mount",
+	[zeek_agent::REMOVE] = "unmount",
+};
 
-event zeek_init(){
-	local ev = [$ev=zeek_agent::table_mounts,$query="SELECT device, device_alias, path, type, blocks_size, blocks, flags FROM mounts", $utype=zeek_agent::BOTH, $inter=zeek_agent::QUERY_INTERVAL];
+event AgentMounts::change(result: zeek_agent::Result, path: string)
+	{
+	local info = Info($ts = network_time(),
+	                  $host = result$host,
+	                  $action = mount_lookup[result$utype],
+	                  $path = path);
+
+	Log::write(LOG, info);
+	}
+
+event zeek_init() &priority=10
+	{
+	Log::create_stream(LOG, [$columns=Info, $path="agent-mounts"]);
+
+	local ev = zeek_agent::Query($ev=AgentMounts::change,
+	                             $query="SELECT path FROM mounts",
+	                             $utype=zeek_agent::BOTH);
 	zeek_agent::subscribe(ev);
 	}

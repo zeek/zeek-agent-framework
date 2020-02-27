@@ -2,7 +2,7 @@
 
 @load zeek-agent
 
-module Agent_Interfaces;
+module AgentInterfaces;
 
 export {
 
@@ -19,7 +19,8 @@ export {
 }
 
 
-event Agent_Interfaces::new_interface(result: zeek_agent::Result, interface: string, mac: string, ip: string, mask: string) {
+event AgentInterfaces::new_interface(result: zeek_agent::Result, interface: string, mac: string, ip: string, mask: string)
+	{
 	# Remove interface name from IP and turn the string into an ip address
 	local clean_ip = to_addr(split_string(ip, /\%/)[0]);
 
@@ -35,14 +36,14 @@ event Agent_Interfaces::new_interface(result: zeek_agent::Result, interface: str
 		info$mask = to_addr(mask);
 
 	Log::write(LOG, info);
-}
+	}
 
 
 event zeek_init() &priority=10
 	{
 	Log::create_stream(LOG, [$columns=Info, $path="agent-interfaces"]);
 
-	local query = zeek_agent::Query($ev=Agent_Interfaces::new_interface,
+	local query = zeek_agent::Query($ev=AgentInterfaces::new_interface,
 	                                $query="SELECT d.interface, d.mac, a.address, a.mask FROM interface_addresses AS a INNER JOIN interface_details AS d ON a.interface=d.interface",
 	                                $utype=zeek_agent::ADD);
 	zeek_agent::subscribe(query);

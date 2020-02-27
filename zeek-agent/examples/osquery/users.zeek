@@ -2,32 +2,49 @@
 
 @load zeek-agent
 
-module zeek_agent;
+module AgentUsers;
 
 export {
-	## Event to indicate that a new user was added on a host
-	##
-	## <params missing>
-	global user_added: event(t: time, host_id: string, uid: int, gid: int, uid_signed: int, gid_signed: int, username: string, description: string, directory: string, shell: string, uuid: string, user_type: string);
-	
-	## Event to indicate that a existing user was removed on a host
-	##
-	## <params missing>
-	global user_removed: event(t: time, host_id: string, uid: int, gid: int, uid_signed: int, gid_signed: int, username: string, description: string, directory: string, shell: string, uuid: string, user_type: string);
+	redef enum Log::ID += { LOG };
+
+	type Info: record {
+		ts:          time   &log;
+		host:        string &log;
+		action:      string &log;
+		username:    string &log;
+		uid:         int    &log;
+		gid:         int    &log;
+		description: string &log;
+		home_dir:    string &log;
+		shell:       string &log;
+	};
 }
 
-event zeek_agent::table_users(resultInfo: zeek_agent::ResultInfo,
-		uid: int, gid: int, uid_signed: int, gid_signed: int, username: string, 
-		description: string, directory: string, shell: string, uuid: string, user_type: string) {
-	if (resultInfo$utype == zeek_agent::ADD) {
-		event zeek_agent::user_added(network_time(), resultInfo$host, uid, gid, uid_signed, gid_signed, username, description, directory, shell, uuid, user_type);
-	}
-	if (resultInfo$utype == zeek_agent::REMOVE) {
-		event zeek_agent::user_removed(network_time(), resultInfo$host, uid, gid, uid_signed, gid_signed, username, description, directory, shell, uuid, user_type);
-	}
-}
+event AgentUsers::change(result: zeek_agent::Result, uid: int, gid: int, username: string, description: string, directory: string, shell: string)
+	{
+	# Don't log existing users.  We only want the moment users are added or removed.
+	if ( result$utype == zeek_agent::INITIAL )
+		return;
 
-event zeek_init() {
-	local query = [$ev=zeek_agent::table_users,$query="SELECT uid, gid, uid_signed, gid_signed, username, description, directory, shell, uuid, type FROM users", $utype=zeek_agent::BOTH, $inter=zeek_agent::QUERY_INTERVAL];
+	local info = Info($ts = network_time(),
+	                  $host = result$host,
+	                  $action = (result$utype == zeek_agent::ADD ? "add" : "remove"),
+	                  $username = username,
+	                  $uid = uid,
+	                  $gid = gid,
+	                  $description = description,
+	                  $home_dir = directory,
+	                  $shell = shell);
+
+	Log::write(LOG, info);
+	}
+
+event zeek_init() &priority=10
+	{
+	Log::create_stream(LOG, [$columns=Info, $path="agent-users"]);
+
+	local query = zeek_agent::Query($ev=AgentUsers::change,
+	                                $query="SELECT uid_signed, gid_signed, username, description, directory, shell FROM users",
+	                                $utype=zeek_agent::BOTH);
 	zeek_agent::subscribe(query);
-}
+	}
