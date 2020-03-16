@@ -1,5 +1,5 @@
 
-module zeek_agent;
+module ZeekAgent;
 
 export {
 	# Interval in seconds to execute scheduled queries on hosts

@@ -2,7 +2,7 @@
 @load base/frameworks/broker
 @load base/frameworks/logging
 
-module zeek_agent;
+module ZeekAgent;
 
 export {
 	## Subscribe to an event from clients. Whenever an zeek-agent connects to us, we'll subscribe to all matching
@@ -108,8 +108,8 @@ function subscribe(q: Query, host: string, group: string)
 
 function subscribe_multiple(q: Query, host_list: vector of string, group_list: vector of string)
 	{
-	zeek_agent::share_subscription(q, host_list, group_list);
-	zeek_agent::insert_subscription(q, host_list, group_list);
+	ZeekAgent::share_subscription(q, host_list, group_list);
+	ZeekAgent::insert_subscription(q, host_list, group_list);
 	}
 
 function unsubscribe(q: Query, host: string, group: string)
@@ -121,8 +121,8 @@ function unsubscribe(q: Query, host: string, group: string)
 
 function unsubscribe_multiple(q: Query, host_list: vector of string, group_list: vector of string)
 	{
-	zeek_agent::unshare_subscription(q, host_list, group_list);
-	zeek_agent::remove_subscription(q, host_list, group_list);
+	ZeekAgent::unshare_subscription(q, host_list, group_list);
+	ZeekAgent::remove_subscription(q, host_list, group_list);
 	}
 
 function execute(q: Query, host: string, group: string)
@@ -134,8 +134,8 @@ function execute(q: Query, host: string, group: string)
 
 function execute_multiple(q: Query, host_list: vector of string, group_list: vector of string)
 	{
-	zeek_agent::share_execution(q, host_list, group_list);
-	zeek_agent::insert_execution(q, host_list, group_list);
+	ZeekAgent::share_execution(q, host_list, group_list);
+	ZeekAgent::insert_execution(q, host_list, group_list);
 	}
 
 function join(range: subnet, group: string)
@@ -146,8 +146,8 @@ function join(range: subnet, group: string)
 
 function join_multiple(range_list: vector of subnet, group: string)
 	{
-	zeek_agent::share_grouping(range_list, group);
-	zeek_agent::insert_grouping(range_list, group);
+	ZeekAgent::share_grouping(range_list, group);
+	ZeekAgent::insert_grouping(range_list, group);
 	}
 
 function leave(range: subnet, group: string)
@@ -158,8 +158,8 @@ function leave(range: subnet, group: string)
 
 function leave_multiple(range_list: vector of subnet, group: string)
 	{
-	zeek_agent::unshare_grouping(range_list, group);
-	zeek_agent::remove_grouping(range_list, group);
+	ZeekAgent::unshare_grouping(range_list, group);
+	ZeekAgent::remove_grouping(range_list, group);
 	}
 
 event Broker::peer_added(endpoint: Broker::EndpointInfo, msg: string)

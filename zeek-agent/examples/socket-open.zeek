@@ -23,13 +23,13 @@ export {
 	};
 }
 
-event Agent_SocketOpen::socket_open(result: zeek_agent::Result,
+event Agent_SocketOpen::socket_open(result: ZeekAgent::Result,
                                     action: string, pid: int, fd: int, path: string,
                                     local_address: string, remote_address: string,
                                     local_port: int, remote_port: int,
                                     host_time: int, success: int)
 	{
-	if ( result$utype != zeek_agent::ADD )
+	if ( result$utype != ZeekAgent::ADD )
 		return;
 
 	local host_ts = double_to_time(host_time);
@@ -57,8 +57,8 @@ event zeek_init() &priority=10
 	{
 	Log::create_stream(LOG, [$columns=Info, $path="agent-sockets_opening"]);
 
-	local query = zeek_agent::Query($ev=Agent_SocketOpen::socket_open,
+	local query = ZeekAgent::Query($ev=Agent_SocketOpen::socket_open,
 	                                $query="SELECT action, pid, fd, path, local_address, remote_address, local_port, remote_port, time, success FROM socket_events WHERE family=2",
-	                                $utype=zeek_agent::ADD);
-	zeek_agent::subscribe(query);
+	                                $utype=ZeekAgent::ADD);
+	ZeekAgent::subscribe(query);
 	}
