@@ -64,6 +64,20 @@ the endhost yet. Check out the `examples/` directory for scripts that
 are using the built in (currently Linux audit based) and Osquery based
 functionality. 
 
+# Examples
+
+The framework ships with examples that currently use Osquery derived tables
+and Linux auditd based tables.  Use the follow lines to load all of the
+associated examples.
+
+To load the Osquery examples:
+
+    @load zeek-agent-framework/examples/osquery
+
+To load the auditd examples:
+
+    @load zeek-agent-framework/examples/auditd
+
 
 # Credits
 
