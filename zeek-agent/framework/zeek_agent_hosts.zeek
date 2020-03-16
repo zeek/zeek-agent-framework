@@ -1,7 +1,7 @@
 @load base/frameworks/broker
 @load base/frameworks/logging
 
-module zeek_agent;
+module ZeekAgent;
 
 export {
 	## Checks the new ip address of the given host against the groupings and makes it to join respective groups.
@@ -32,7 +32,7 @@ global connect_balance: table[string] of count;
 ## client_id: The client ID
 function send_subscriptions_new_host(host_id: string)
 	{
-	local host_topic = fmt("%s/%s", zeek_agent::HostIndividualTopic, host_id);
+	local host_topic = fmt("%s/%s", ZeekAgent::HostIndividualTopic, host_id);
 	for ( i in subscriptions )
 		{
 		local s = subscriptions[i];
@@ -51,7 +51,7 @@ function send_subscriptions_new_host(host_id: string)
 		     |sub_groups| <= 1 && sub_groups[0] == "" )
 			 {
 			# To all if nothing specified
-			zeek_agent::send_subscribe(host_topic, s$query);
+			ZeekAgent::send_subscribe(host_topic, s$query);
 			skip_subscription = T;
 			}
 			
@@ -64,7 +64,7 @@ function send_subscriptions_new_host(host_id: string)
 			local sub_host = sub_hosts[j];
 			if ( host_id == sub_host )
 				{
-			    zeek_agent::send_subscribe(host_topic, s$query);
+			    ZeekAgent::send_subscribe(host_topic, s$query);
 			    skip_subscription = T;
 			    break;
 				}
@@ -83,7 +83,7 @@ function send_subscriptions_new_host(host_id: string)
 				if ( |host_group| <= |sub_group| && 
 				     host_group == sub_group[:|host_group|] )
 					{
-					zeek_agent::send_subscribe(host_topic, s$query);
+					ZeekAgent::send_subscribe(host_topic, s$query);
 					skip_subscription = T;
 					break;
 					}
@@ -100,7 +100,7 @@ function send_subscriptions_new_host(host_id: string)
 ## Checks for subscriptions that match the recently joined group
 function send_subscriptions_new_group(host_id: string, group: string)
 	{
-	local host_topic = fmt("%s/%s", zeek_agent::HostIndividualTopic, host_id);
+	local host_topic = fmt("%s/%s", ZeekAgent::HostIndividualTopic, host_id);
 	for ( i in subscriptions )
 		{
 		local s = subscriptions[i];
@@ -120,7 +120,7 @@ function send_subscriptions_new_group(host_id: string, group: string)
 				{
 				if ( |group| <= |sub_group| && group == sub_group[:|group|] )
 					{
-					zeek_agent::send_subscribe(host_topic, s$query);
+					ZeekAgent::send_subscribe(host_topic, s$query);
 					break;
 					}
 				}
@@ -131,7 +131,7 @@ function send_subscriptions_new_group(host_id: string, group: string)
 ## Checks for groups that match the recently added address
 function send_joins_new_address(host_id: string, ip: addr)
 	{
-	local host_topic = fmt("%s/%s", zeek_agent::HostIndividualTopic,host_id);
+	local host_topic = fmt("%s/%s", ZeekAgent::HostIndividualTopic,host_id);
 	local new_groups: vector of string;
 	for ( i in groupings )
 		{
@@ -149,8 +149,8 @@ function send_joins_new_address(host_id: string, ip: addr)
 			if ( ip in range )
 				{
 				local new_group: string = c$group;
-				zeek_agent::log("info", host_id, fmt("joining new group %s", new_group));
-				zeek_agent::send_join( host_topic, new_group );
+				ZeekAgent::log("info", host_id, fmt("joining new group %s", new_group));
+				ZeekAgent::send_join( host_topic, new_group );
 				host_groups[host_id] += new_group;
 				new_groups += new_group;
 				break;
@@ -165,22 +165,22 @@ function send_joins_new_address(host_id: string, ip: addr)
 		}
 	}
 
-hook zeek_agent::add_host_addr(host_id: string, ip: addr)
+hook ZeekAgent::add_host_addr(host_id: string, ip: addr)
 	{
 	send_joins_new_address(host_id, ip);
 	}
 
-hook zeek_agent::add_host_addr(host_id: string, ip: addr)
+hook ZeekAgent::add_host_addr(host_id: string, ip: addr)
 	{
 	#TODO
 	}
 
 @if ( !Cluster::is_enabled() || Cluster::local_node_type() == Cluster::MANAGER )
-event zeek_agent::host_new(peer_name: string, host_id: string, group_list: vector of string, zeek_agent_version: string, zeek_agent_edition: string)
+event ZeekAgent::host_new(peer_name: string, host_id: string, group_list: vector of string, zeek_agent_version: string, zeek_agent_edition: string)
 	{
 	# 'standalone' edition only comes with built-in tables
 	# 'osquery' edition can export additional tables IF osquery is connected
-	zeek_agent::log("info", host_id, fmt("Zeek Agent v%s (%s) host connected (%s announced as: %s)", zeek_agent_version, zeek_agent_edition, peer_name, host_id));
+	ZeekAgent::log("info", host_id, fmt("Zeek Agent v%s (%s) host connected (%s announced as: %s)", zeek_agent_version, zeek_agent_edition, peer_name, host_id));
 	
 	#TODO: Do not load the osquery tables if the client edition is set to 'standalone'
 	# ...
@@ -195,13 +195,13 @@ event zeek_agent::host_new(peer_name: string, host_id: string, group_list: vecto
 	
 	host_groups[host_id] = group_list;
 	#TODO: that is only the topic prefix
-	host_groups[host_id] += zeek_agent::HostIndividualTopic;
+	host_groups[host_id] += ZeekAgent::HostIndividualTopic;
 	
 	# Make host to join group and to schedule queries
 	send_subscriptions_new_host(host_id);
 	
 	# raise event for new host
-	event zeek_agent::host_connected(host_id);
+	event ZeekAgent::host_connected(host_id);
 	}
 
 function _reset_peer(peer_name: string)
@@ -210,7 +210,7 @@ function _reset_peer(peer_name: string)
 		return;
 	
 	local host_id: string = peer_to_host[peer_name];
-	zeek_agent::log("info", host_id, "Zeek Agent host disconnected");
+	ZeekAgent::log("info", host_id, "Zeek Agent host disconnected");
 	
 	# Check if anyone else is left in the groups
 	local others_groups: set[string];
@@ -275,10 +275,10 @@ event Broker::peer_lost(endpoint: Broker::EndpointInfo, msg: string)
 	if ( peer_name in peer_to_host )
 		{
 		local host_id: string = peer_to_host[peer_name];
-		zeek_agent::log("info", host_id, "Zeek Agent host disconnected");
+		ZeekAgent::log("info", host_id, "Zeek Agent host disconnected");
 		
 		# raise event for the disconnected host
-		event zeek_agent::host_disconnected(host_id);
+		event ZeekAgent::host_disconnected(host_id);
 		}
 	
 	# Connect balance
@@ -298,8 +298,8 @@ event Broker::peer_lost(endpoint: Broker::EndpointInfo, msg: string)
 event zeek_init()
 	{
 	# Listen on host announce topic
-	local topic: string = zeek_agent::HostAnnounceTopic;
-	zeek_agent::log_local("info", fmt("Subscribing to host announce topic %s", topic));
+	local topic: string = ZeekAgent::HostAnnounceTopic;
+	ZeekAgent::log_local("info", fmt("Subscribing to host announce topic %s", topic));
 	Broker::subscribe(topic);
 	} 
 @endif

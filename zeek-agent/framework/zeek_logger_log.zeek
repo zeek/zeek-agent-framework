@@ -1,7 +1,7 @@
 
 #! Logs socket events activity
 
-module zeek_agent::logging::table_logger;
+module ZeekAgent::logging::table_logger;
 
 export {
 	redef enum Log::ID += { LOG };
@@ -16,7 +16,7 @@ export {
 }
 
 @if ( !Cluster::is_enabled() || Cluster::local_node_type() == Cluster::MANAGER )
-event zeek_agent::log_added(ts: time, host_id: string, event_time :int, severity :string, message :string)
+event ZeekAgent::log_added(ts: time, host_id: string, event_time :int, severity :string, message :string)
 	{
 	local info = Info($ts=ts,
 	                  $host=host_id,

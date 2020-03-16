@@ -26,10 +26,10 @@ export {
 	} &redef &default=function(i: int): string { return fmt("unknown-%d", i); };
 }
 
-event AgentListeningPorts::listening_port(result: zeek_agent::Result, pid: int, process_name: string, protocol: int, local_addr: string, local_port: int)
+event AgentListeningPorts::listening_port(result: ZeekAgent::Result, pid: int, process_name: string, protocol: int, local_addr: string, local_port: int)
 	{
 	# Don't log existing open ports.  We only want the moment ports are opened or closed.
-	if ( result$utype == zeek_agent::INITIAL )
+	if ( result$utype == ZeekAgent::INITIAL )
 		return;
 
 	# Remove interface name from IP and turn the string into an ip address
@@ -37,7 +37,7 @@ event AgentListeningPorts::listening_port(result: zeek_agent::Result, pid: int, 
 
 	local info = Info($ts = network_time(),
 	                  $host = result$host,
-	                  $action = result$utype == zeek_agent::ADD ? "opened" : "closed",
+	                  $action = result$utype == ZeekAgent::ADD ? "opened" : "closed",
 	                  $pid = pid,
 	                  $process_name = process_name,
 	                  $protocol = proto_lookup[protocol],
@@ -52,10 +52,10 @@ event zeek_init() &priority=10
 	Log::create_stream(LOG, [$columns=Info, $path="agent-listening-ports"]);
 
 	# Family 2 is INET, so we're only watching for that.
-	local query = zeek_agent::Query($ev=AgentListeningPorts::listening_port,
+	local query = ZeekAgent::Query($ev=AgentListeningPorts::listening_port,
 	                                #$query="SELECT pid, protocol, address, port FROM listening_ports WHERE family=2",
 	                                $query="SELECT listening_ports.pid, name, protocol, address, port FROM listening_ports LEFT JOIN processes WHERE processes.pid=listening_ports.pid AND family=2 AND address!='127.0.0.1' AND address!='::1';",
-	                                $utype=zeek_agent::BOTH);
+	                                $utype=ZeekAgent::BOTH);
 
-	zeek_agent::subscribe(query);
+	ZeekAgent::subscribe(query);
 	}

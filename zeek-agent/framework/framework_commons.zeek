@@ -1,4 +1,4 @@
-module zeek_agent;
+module ZeekAgent;
 
 export {
 	## The local IP Broker is listening on
@@ -75,7 +75,7 @@ export {
 		## The type of update to report.
 		utype: UpdateType &default=BOTH;
 		## The interval of the query
-		inter: interval &optional &default=zeek_agent::default_query_interval;
+		inter: interval &optional &default=ZeekAgent::default_query_interval;
 		## The Broker topic THEY send the query result to
 		resT: string &default=Zeek_ID_Topic;
 		## The Zeek event to execute when receiving updates.
@@ -129,7 +129,7 @@ export {
 	## level: the severity of the message
 	## peer: the identifier for the zeek-agent or group 
 	## msg: the message content
-	global zeek_agent::log: function(level: string, peer: string, msg: string, log: any &default=LOG);
+	global ZeekAgent::log: function(level: string, peer: string, msg: string, log: any &default=LOG);
 	
 	## Comparison of two queries to be equal
 	global same_event: function (q1: Query, q2: Query): bool;
@@ -153,7 +153,7 @@ function log_zeek(level: string, peer: string, msg: string, log: any)
 	                     $message = msg));
 	}
 
-function zeek_agent::log(level: string, peer: string, msg: string, log: any)
+function ZeekAgent::log(level: string, peer: string, msg: string, log: any)
 	{
 	Log::write(log, Info($ts = network_time(),
 	                     $level = level,

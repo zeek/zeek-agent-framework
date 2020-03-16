@@ -21,11 +21,11 @@ export {
 	};
 }
 
-event Agent_ProcessStart::process_start(result: zeek_agent::Result,
+event Agent_ProcessStart::process_start(result: ZeekAgent::Result,
 		pid: int, path: string, cmdline: string, cwd: string, 
 		uid: int, gid: int, host_time: int, parent: int)
 	{
-	if ( result$utype != zeek_agent::ADD )
+	if ( result$utype != ZeekAgent::ADD )
 		return;
 
 	local host_ts = double_to_time(host_time);
@@ -47,8 +47,8 @@ event zeek_init() &priority=10
 	{
 	Log::create_stream(LOG, [$columns=Info, $path="agent-process_events"]);
 	
-	local query = zeek_agent::Query($ev=Agent_ProcessStart::process_start,
+	local query = ZeekAgent::Query($ev=Agent_ProcessStart::process_start,
 	                                $query="SELECT pid, path, cmdline, cwd, uid, gid, time, parent FROM process_events",
-	                                $utype=zeek_agent::ADD);
-	zeek_agent::subscribe(query);
+	                                $utype=ZeekAgent::ADD);
+	ZeekAgent::subscribe(query);
 	}

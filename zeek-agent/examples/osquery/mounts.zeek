@@ -20,12 +20,12 @@ export {
 }
 
 const mount_lookup = {
-	[zeek_agent::INITIAL] = "existing_mount",
-	[zeek_agent::ADD] = "new_mount",
-	[zeek_agent::REMOVE] = "unmount",
+	[ZeekAgent::INITIAL] = "existing_mount",
+	[ZeekAgent::ADD] = "new_mount",
+	[ZeekAgent::REMOVE] = "unmount",
 };
 
-event AgentMounts::change(result: zeek_agent::Result, path: string)
+event AgentMounts::change(result: ZeekAgent::Result, path: string)
 	{
 	local info = Info($ts = network_time(),
 	                  $host = result$host,
@@ -39,8 +39,8 @@ event zeek_init() &priority=10
 	{
 	Log::create_stream(LOG, [$columns=Info, $path="agent-mounts"]);
 
-	local ev = zeek_agent::Query($ev=AgentMounts::change,
+	local ev = ZeekAgent::Query($ev=AgentMounts::change,
 	                             $query="SELECT path FROM mounts",
-	                             $utype=zeek_agent::BOTH);
-	zeek_agent::subscribe(ev);
+	                             $utype=ZeekAgent::BOTH);
+	ZeekAgent::subscribe(ev);
 	}
