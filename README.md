@@ -60,9 +60,9 @@ file `zeek-agent.log` that records the hosts connecting to Zeek:
     1576768877.709030	local	ZeekMaster	info	Incoming connection established from C6EAF3CFDF46831E2D9103E5A1C48F78AD873A3C#7503
 
 You won't see much more at first as there's nothing sending queries to
-the endhost yet. Check out the `examples/` directory for scripts that 
+the endhost yet. Check out the `examples/` directory for scripts that
 are using the built in (currently Linux audit based) and Osquery based
-functionality. 
+functionality.
 
 # Examples
 
@@ -81,7 +81,7 @@ To load the auditd examples:
 
 # Credits
 
-This Zeek framework is based on an earlier implementation by [Steffan
+This Zeek framework is based on an earlier implementation by [Steffen
 Haas](https://github.com/iBigQ), with recent work contributed by
 [Corelight](https://www.corelight.com) and [Trail of
 Bits](https://www.trailofbits.com).
