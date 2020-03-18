@@ -11,6 +11,7 @@ export {
 	type Info: record {
 		ts:        time   &log;
 		host:      string &log;
+                hostname:  string &log;
 		interface: string &log;
 		mac:       string &log &optional;
 		ip:        addr   &log;
@@ -26,6 +27,7 @@ event AgentInterfaces::new_interface(result: ZeekAgent::Result, interface: strin
 
 	local info = Info($ts = network_time(),
 	                  $host = result$host,
+			  $hostname = ZeekAgent::getHostInfo(result$host)$hostname,
 	                  $interface = interface,
 	                  $ip = clean_ip);
 

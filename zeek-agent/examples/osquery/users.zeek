@@ -10,6 +10,7 @@ export {
 	type Info: record {
 		ts:          time   &log;
 		host:        string &log;
+                hostname:    string &log;
 		action:      string &log;
 		username:    string &log;
 		uid:         int    &log;
@@ -28,6 +29,7 @@ event AgentUsers::change(result: ZeekAgent::Result, uid: int, gid: int, username
 
 	local info = Info($ts = network_time(),
 	                  $host = result$host,
+			  $hostname = ZeekAgent::getHostInfo(result$host)$hostname,
 	                  $action = (result$utype == ZeekAgent::ADD ? "add" : "remove"),
 	                  $username = username,
 	                  $uid = uid,

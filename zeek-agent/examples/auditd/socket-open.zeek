@@ -11,6 +11,7 @@ export {
 		ts:             time   &log;
 		host_ts:        time   &log;
 		host:           string &log;
+		hostname:       string &log;
 		action:         string &log;
 		pid:            int    &log;
 		fd:             int    &log;
@@ -36,6 +37,7 @@ event Agent_SocketOpen::socket_open(result: ZeekAgent::Result,
 	local info = Info($ts = network_time(),
 	                  $host_ts = host_ts,
 	                  $host = result$host,
+	                  $hostname = ZeekAgent::getHostInfo(result$host)$hostname,
 	                  $pid = pid,
 	                  $action = action,
 	                  $fd = fd,
