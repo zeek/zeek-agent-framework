@@ -11,6 +11,7 @@ export {
 		ts:         time   &log;
 		host_ts:    time   &log;
 		host:       string &log;
+		hostname:   string &log;
 		pid:        int    &log;
 		path:       string &log;
 		cmdline:    string &log;
@@ -32,6 +33,7 @@ event Agent_ProcessStart::process_start(result: ZeekAgent::Result,
 	local info = Info($ts = network_time(),
 	                  $host_ts = host_ts,
 	                  $host = result$host,
+	                  $hostname = ZeekAgent::getHostInfo(result$host)$hostname,
 	       	          $pid = pid,
 	                  $path = path,
 	                  $cmdline = cmdline,

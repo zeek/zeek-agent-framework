@@ -56,7 +56,17 @@ export {
 	##
 	## host_id: The identifier of the host
 	global isHostAlive: function(host_id: string): bool;
-	
+
+	type HostInfo: record {
+		uuid: string; ##< UUID of host
+		hostname: string &default="<unknown>"; ##< self-reported name of host
+	};
+
+	## Get meta data about a connected host. If
+	## called for a host with isHostAlive() = false, will return
+        ## a dummy record.
+	global getHostInfo: function(host_id: string) : HostInfo;
+
 	# Internal record for tracking a subscription.
 	type Subscription: record {
 		query: ZeekAgent::Query;
@@ -82,7 +92,7 @@ global subscriptions: Subscriptions;
 global groupings: Groupings;
 
 # Internal set for tracing client ids
-global hosts: set[string];
+global hosts: table[string] of HostInfo;
 
 # Internal set for groups of clients
 global groups: set[string] = {ZeekAgent::HostBroadcastTopic};
@@ -239,3 +249,14 @@ function isHostAlive(host_id: string): bool
 	{
 	return host_id in hosts;
 	}
+
+function getHostInfo(host_id: string) : HostInfo
+	{
+	if ( host_id in hosts )
+		return hosts[host_id];
+	else
+		return [$uuid=host_id];
+	}
+
+
+

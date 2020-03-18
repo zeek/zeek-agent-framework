@@ -176,7 +176,7 @@ hook ZeekAgent::add_host_addr(host_id: string, ip: addr)
 	}
 
 @if ( !Cluster::is_enabled() || Cluster::local_node_type() == Cluster::MANAGER )
-event ZeekAgent::host_new(peer_name: string, host_id: string, group_list: vector of string, zeek_agent_version: string, zeek_agent_edition: string)
+event ZeekAgent::host_new(peer_name: string, hostname: string, host_id: string, group_list: vector of string, zeek_agent_version: string, zeek_agent_edition: string)
 	{
 	# 'standalone' edition only comes with built-in tables
 	# 'osquery' edition can export additional tables IF osquery is connected
@@ -187,7 +187,7 @@ event ZeekAgent::host_new(peer_name: string, host_id: string, group_list: vector
 	
 	# Internal client tracking
 	peer_to_host[peer_name] = host_id;
-	add hosts[host_id];
+	hosts[host_id] = [$uuid = host_id, $hostname=hostname];
 	for ( i in group_list )
 		{
 		add groups[group_list[i]];

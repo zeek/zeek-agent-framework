@@ -10,6 +10,7 @@ export {
 	type Info: record {
 		ts:           time &log;
 		host:         string &log;
+                hostname:     string &log;
 		## Indicate if the port was "opened" or "closed".
 		action:       string &log;
 		address:      addr &log;
@@ -37,6 +38,7 @@ event AgentListeningPorts::listening_port(result: ZeekAgent::Result, pid: int, p
 
 	local info = Info($ts = network_time(),
 	                  $host = result$host,
+			  $hostname = ZeekAgent::getHostInfo(result$host)$hostname,
 	                  $action = result$utype == ZeekAgent::ADD ? "opened" : "closed",
 	                  $pid = pid,
 	                  $process_name = process_name,
