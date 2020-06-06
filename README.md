@@ -72,11 +72,15 @@ associated examples.
 
 To load the Osquery examples:
 
-    @load zeek-agent-framework/examples/osquery
+    @load zeek-agent/examples/osquery
 
 To load the auditd examples:
 
-    @load zeek-agent-framework/examples/auditd
+    @load zeek-agent/examples/auditd
+
+To load the EndpointSecurity (MacOS) examples:
+
+    @load zeek-agent/examples/endpointsecurity
 
 
 # Credits
