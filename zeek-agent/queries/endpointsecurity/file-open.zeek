@@ -1,8 +1,8 @@
-##! Logs process events activity
+##! Logs file events activity
 
 @load zeek-agent
 
-module Agent_ProcessStart;
+module Agent_FileOpen;
 
 export {
 	redef enum Log::ID += { LOG };
@@ -12,19 +12,18 @@ export {
 		host_ts:    time   &log;
 		host:       string &log;
 		hostname:   string &log;
+		parent:     int    &log;
 		pid:        int    &log;
-		path:       string &log;
-		cmdline:    string &log;
-		cwd:        string &log;
 		uid:        int    &log;
 		gid:        int    &log;
-		parent:     int    &log;
+		path:       string &log;
+		file_path:    string &log;
+		action:    string &log;
 	};
 }
 
-event Agent_ProcessStart::process_start(result: ZeekAgent::Result,
-		pid: int, path: string, cmdline: string, cwd: string, 
-		uid: int, gid: int, host_time: int, parent: int)
+event Agent_FileOpen::file_open(result: ZeekAgent::Result,
+		parent: int, pid: int, uid: int, gid: int, path: string, file_path: string, action: string, host_time: int)
 	{
 	if ( result$utype != ZeekAgent::ADD )
 		return;
@@ -34,23 +33,24 @@ event Agent_ProcessStart::process_start(result: ZeekAgent::Result,
 	                  $host_ts = host_ts,
 	                  $host = result$host,
 	                  $hostname = ZeekAgent::getHostInfo(result$host)$hostname,
+			  $parent = parent,
 	       	          $pid = pid,
+			  $uid = uid,
+			  $gid = gid,
 	                  $path = path,
-	                  $cmdline = cmdline,
-	                  $cwd = cwd,
-	                  $uid = uid,
-	                  $gid = gid,
-	                  $parent = parent);
+	                  $file_path = file_path,
+			  $action = action);
 
 	Log::write(LOG, info);
 	}
 
+
 event zeek_init() &priority=10
 	{
-	Log::create_stream(LOG, [$columns=Info, $path="agent-process_events"]);
-	
-	local query = ZeekAgent::Query($ev=Agent_ProcessStart::process_start,
-	                                $query="SELECT pid, path, cmdline, cwd, uid, gid, time, parent FROM process_events",
+	Log::create_stream(LOG, [$columns=Info, $path="agent-file_events"]);
+
+	local query = ZeekAgent::Query($ev=Agent_FileOpen::file_open,
+	                                $query="SELECT parent_process_id, process_id, user_id, group_id, path, file_path, type, timestamp FROM file_events",
 	                                $utype=ZeekAgent::ADD);
 	ZeekAgent::subscribe(query);
 	}
