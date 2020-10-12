@@ -13,22 +13,23 @@ export {
 		host:           string &log;
 		hostname:       string &log;
 		action:         string &log;
+		uid:		int    &log;
 		pid:            int    &log;
-		fd:             int    &log;
-		path:           string &log;
+		path:         	string &log;
+		family:		int    &log;
 		local_address:  addr   &log &default=0.0.0.0;
-		remote_address: addr   &log &default=0.0.0.0;
 		local_port:     int    &log;
+		remote_address: addr   &log &default=0.0.0.0;
 		remote_port:    int    &log;
-		success:        int    &log;
 	};
 }
 
 event Agent_SocketOpen::socket_open(result: ZeekAgent::Result,
-                                    action: string, pid: int, fd: int, path: string,
+                                    action: string, uid: int, pid: int,
+				    path: string, family: int,
                                     local_address: string, remote_address: string,
                                     local_port: int, remote_port: int,
-                                    host_time: int, success: int)
+                                    host_time: int)
 	{
 	if ( result$utype != ZeekAgent::ADD )
 		return;
@@ -38,13 +39,13 @@ event Agent_SocketOpen::socket_open(result: ZeekAgent::Result,
 	                  $host_ts = host_ts,
 	                  $host = result$host,
 	                  $hostname = ZeekAgent::getHostInfo(result$host)$hostname,
+			  $action = action,
+			  $uid = uid,
 	                  $pid = pid,
-	                  $action = action,
-	                  $fd = fd,
-	                  $path = path,
+			  $path = path,
+			  $family = family,
 	                  $local_port = local_port,
-	                  $remote_port = remote_port,
-	                  $success = success);
+	                  $remote_port = remote_port);
 
 	if ( local_address != "" )
 		info$local_address = to_addr(local_address);
@@ -60,7 +61,7 @@ event zeek_init() &priority=10
 	Log::create_stream(LOG, [$columns=Info, $path="agent-sockets_opening"]);
 
 	local query = ZeekAgent::Query($ev=Agent_SocketOpen::socket_open,
-	                                $query="SELECT action, pid, fd, path, local_address, remote_address, local_port, remote_port, time, success FROM socket_events WHERE family=2",
+	                                $query="SELECT type, user_id, process_id, path, family, local_address, remote_address, local_port, remote_port, timestamp FROM socket_events",
 	                                $utype=ZeekAgent::ADD);
 	ZeekAgent::subscribe(query);
 	}

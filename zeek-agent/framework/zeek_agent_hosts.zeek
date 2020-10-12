@@ -21,6 +21,9 @@ export {
 	
 	## Hook that can be called by others to indicate that an IP address was removed from a host
 	global remove_host_addr: hook(host_id: string, ip: addr);
+
+	## Event for worker to add ip address and host id to state
+	global host_ipaddr_add_worker: event(host_id: string, ip_addr: string);
 }
 
 global connect_balance: table[string] of count;
@@ -176,7 +179,7 @@ hook ZeekAgent::add_host_addr(host_id: string, ip: addr)
 	}
 
 @if ( !Cluster::is_enabled() || Cluster::local_node_type() == Cluster::MANAGER )
-event ZeekAgent::host_new(peer_name: string, hostname: string, host_id: string, group_list: vector of string, zeek_agent_version: string, zeek_agent_edition: string)
+event ZeekAgent::host_new(peer_name: string, hostname: string, host_id: string, group_list: vector of string, zeek_agent_version: string, zeek_agent_edition: string, host_ip_addrs: vector of string)
 	{
 	# 'standalone' edition only comes with built-in tables
 	# 'osquery' edition can export additional tables IF osquery is connected
@@ -192,6 +195,11 @@ event ZeekAgent::host_new(peer_name: string, hostname: string, host_id: string, 
 		{
 		add groups[group_list[i]];
 		}
+    for ( i in host_ip_addrs )
+        {
+        event ZeekAgent::host_ipaddr_add_worker(host_id, host_ip_addrs[i]);
+        Broker::publish(Cluster::worker_topic, Broker::make_event(ZeekAgent::host_ipaddr_add_worker, host_id, host_ip_addrs[i]));
+        }
 	
 	host_groups[host_id] = group_list;
 	#TODO: that is only the topic prefix

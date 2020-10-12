@@ -210,7 +210,7 @@ function insert_grouping(range_list: vector of subnet, group: string)
 	{
 	# Include new Grouping in the vector
 	groupings += Grouping($group=group, $ranges=range_list);
-	
+
 	for ( host in hosts )
 		{
 		local host_topic = fmt("%s/%s", ZeekAgent::HostIndividualTopic,host);
